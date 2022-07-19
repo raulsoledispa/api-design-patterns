@@ -1,12 +1,15 @@
 async function routes(fastify) {
-  fastify.get("/api/users", async (reply) => {
+  fastify.get("/api/users", async (request, reply) => {
     const collection = fastify.mongo.client.db("test").collection("data");
-    reply.send(collection.find({}).toArray());
+    return await collection.find({}).toArray();
   });
 
   fastify.post("/api/users", async (req, reply) => {
+    const { user } = req.body
+
+
     const collection = fastify.mongo.client.db("test").collection("data");
-    await collection.insertOne(req.body);
+    await collection.insertOne(user);
     reply.send({ message: "OK" });
   });
 

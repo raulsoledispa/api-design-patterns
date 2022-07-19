@@ -1,0 +1,13 @@
+services:
+  db:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+  cache:
+    image: redis:latest
+    ports:
+      - 3679
+    depends_on:
+      - db

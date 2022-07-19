@@ -1,6 +1,6 @@
 import Build from "./app.js";
 
-const server = Build();
+const server = await Build();
 
 const start = async () => {
   await server.listen({ port: 3000, host: "0.0.0.0" });
