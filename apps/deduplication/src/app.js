@@ -1,41 +1,34 @@
 import Fastify from "fastify";
 import mongoClient from "@fastify/mongodb";
+import env from "@fastify/env";
 import userRoutes from "./routes/index.js";
-import env  from "@fastify/env";
-import redisClient from "@fastify/redis";
-
 
 const schema = {
   type: "object",
   required: ["URL_DB"],
   properties: {
     URL_DB: {
-      type: "string"
+      type: "string",
     },
     CACHE_HOST: {
-      type: "string"
+      type: "string",
     },
     CACHE_PORT: {
-      type: "integer"
-    },
-    CACHE_PASSWORD: {
-      type: "string"
+      type: "integer",
     }
-  }
-}
-
+  },
+};
 
 export default async function Build() {
   const app = Fastify({
     logger: true,
   });
 
-
   await app.register(env, {
-    confKey: 'config',
-    schema: schema,
-    dotenv: true
-  })
+    confKey: "config",
+    schema,
+    dotenv: true,
+  });
 
   app.register(mongoClient, {
     forceClose: true,
@@ -44,14 +37,13 @@ export default async function Build() {
     useUnifiedTopology: true,
   });
 
-  app.register(redisClient, {
+  app.register(import("@fastify/redis"), {
     host: app.config.CACHE_HOST,
-    password: app.config.CACHE_PASSWORD,
     port: app.config.CACHE_PORT,
-    family: 4
-  })
+    family: 4,
+  });
 
-  await app.register(userRoutes);
+  app.register(userRoutes);
 
   return app;
 }

@@ -1,32 +1,38 @@
 import { createHash } from "crypto";
 
-
 async function routes(fastify) {
   fastify.get("/api/users", async (request, reply) => {
     const collection = fastify.mongo.client.db("test").collection("data");
-    return await collection.find({}).toArray();
+    return collection.find({}).toArray();
   });
 
   fastify.post("/api/users", async (req, reply) => {
-    const { user, transactionId } = req.body
+    const { user, transactionId } = req.body;
 
-    const hash = createHash("sha256").update(JSON.stringify(req.body)).digest("hex");
+    const hash = createHash("sha256")
+      .update(JSON.stringify(req.body))
+      .digest("hex");
 
-    const cachedResult = await fastify.redis.get(transactionId);
+    const cachedResult = await fastify.redis.call("JSON.GET", transactionId);
 
-    if(!cachedResult) {
+    if (!cachedResult) {
       const collection = fastify.mongo.client.db("test").collection("data");
       await collection.insertOne(user);
-      const response = { message: "User created" }
-      await fastify.redis.set(transactionId, JSON.stringify({hash, response}))
+      const response = { message: "User created" };
+
+      await fastify.redis.call(
+        "JSON.SET",
+        transactionId,
+        "$",
+        JSON.stringify({ hash, response })
+      );
+      await fastify.redis.expire(transactionId, 10);
       return response;
     }
 
-    const cachedValue = JSON.parse(cachedResult);
-
-    if(hash === cachedValue.hash){
-      reply.send(cachedValue.response)
-    }else{
+    if (hash === cachedResult.hash) {
+      reply.send(cachedResult.response);
+    } else {
       reply.code(409).send();
     }
   });

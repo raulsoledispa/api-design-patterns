@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start:dev": "node_modules/.bin/nodemon src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:db": "docker run --rm -d -p 27017:27017 --name db-users mongo:5.0",
+    "start:cache": "docker run --rm -d -p 16049:6379 --name cache-users redislabs/rejson:latest",
+    "start:dependencies": "npm run start:db && npm run start:cache"
   },
   "keywords": [],
   "author": "Raul Soledispa",
