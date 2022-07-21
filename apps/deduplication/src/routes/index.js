@@ -30,6 +30,7 @@ async function routes(fastify) {
       return response;
     }
 
+    // noinspection JSCheckFunctionSignatures
     const cachedObject = JSON.parse(cachedRawResult);
     if (hash === cachedObject.hash) {
       reply.send(cachedObject.response);
