@@ -19,8 +19,8 @@ async function routes(fastify) {
 
     if (!cachedRawResult) {
       const collection = fastify.mongo.client.db("test").collection("data");
-      await collection.insertOne(user);
-      response = { message: "User created" };
+      const { insertedId } = await collection.insertOne(user);
+      response = { id: insertedId };
 
       await fastify.redis.call(
         "JSON.SET",
