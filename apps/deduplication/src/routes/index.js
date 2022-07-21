@@ -13,9 +13,9 @@ async function routes(fastify) {
       .update(JSON.stringify(req.body))
       .digest("hex");
 
-    const cachedResult = await fastify.redis.call("JSON.GET", transactionId);
+    const cachedRawResult = await fastify.redis.call("JSON.GET", transactionId);
 
-    if (!cachedResult) {
+    if (!cachedRawResult) {
       const collection = fastify.mongo.client.db("test").collection("data");
       await collection.insertOne(user);
       const response = { message: "User created" };
@@ -30,8 +30,9 @@ async function routes(fastify) {
       return response;
     }
 
-    if (hash === cachedResult.hash) {
-      reply.send(cachedResult.response);
+    const cachedObject = JSON.parse(cachedRawResult);
+    if (hash === cachedObject.hash) {
+      reply.send(cachedObject.response);
     } else {
       reply.code(409).send();
     }

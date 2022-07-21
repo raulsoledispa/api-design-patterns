@@ -15,7 +15,7 @@ const schema = {
     },
     CACHE_PORT: {
       type: "integer",
-    }
+    },
   },
 };
 
