@@ -1,12 +1,14 @@
 import { createHash } from "crypto";
 
 async function routes(fastify) {
+  /* eslint no-unused-vars: ["error", { "args" : "none"}] */
   fastify.get("/api/users", async (request, reply) => {
     const collection = fastify.mongo.client.db("test").collection("data");
     return collection.find({}).toArray();
   });
 
   fastify.post("/api/users", async (req, reply) => {
+    let response;
     const { user, transactionId } = req.body;
 
     const hash = createHash("sha256")
@@ -18,7 +20,7 @@ async function routes(fastify) {
     if (!cachedRawResult) {
       const collection = fastify.mongo.client.db("test").collection("data");
       await collection.insertOne(user);
-      const response = { message: "User created" };
+      response = { message: "User created" };
 
       await fastify.redis.call(
         "JSON.SET",
@@ -30,13 +32,14 @@ async function routes(fastify) {
       return response;
     }
 
-    // noinspection JSCheckFunctionSignatures
     const cachedObject = JSON.parse(cachedRawResult);
     if (hash === cachedObject.hash) {
-      reply.send(cachedObject.response);
+      response = cachedObject.response;
     } else {
-      reply.code(409).send();
+      reply.code(409);
     }
+
+    return response;
   });
 
   fastify.put("/api/users", async (req, reply) => {
